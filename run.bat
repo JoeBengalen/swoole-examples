@@ -1,0 +1,1 @@
+docker run --rm -it --name swoole -p 8080:8080 -v %CD%:/app -w /app twosee/swoole-coroutine:release php %*
