@@ -82,3 +82,29 @@ root         9  0.0  0.7 362792 14280 pts/0    S+   20:00   0:00 swoole-worker-3
 ```
 
 Note that the master is not multi threaded.
+
+## Async and Pooling
+
+```bash
+run async-pooling.php
+ab -n 20 -c 4 http://localhost:8080/
+docker stop swoole
+```
+
+Having a server with 2 workers, each having a database pool of 2  
+Means being able to process 4 requests concurrently!
+
+Each database call takes exactly 1 second (sleep).
+
+```
+n = number of request
+c = concurrent requests
+s = seconds to complete
+```
+
+This means `ab -n 20 -c 4` can complete in about 5 seconds. (20n / 4c = 5s)  
+This means `ab -n 20 -c 10` still takes 5 seconds, database pool being the bottleneck.  
+Requests will take longer though, as it will accept all 10 at the same time
+
+Without `Runtime::enableCoroutine()` it will take about 10 seconds, as it will block on the 1s sleep.  
+20 request block 20 seconds split over 2 workers = 10 seconds total time
